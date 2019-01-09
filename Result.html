@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <title>
+            Result
+        </title>
+        <script src="jquery.js"></script>
+        <script>
+            $(function(){
+                
+                $.ajax({
+                    url:"getResult.php",
+                    success:function(resp){
+                        
+                        $("#d1").html(resp);
+                    },
+                    error:function(){
+                        
+                    }
+                });
+            });
+            
+            
+        </script>
+    </head>
+    <body>
+        <div id="d1"></div>
+    </body>
+    
+    
+</html>

@@ -1,0 +1,336 @@
+<html>
+    <head>
+        <title>
+            Mock Test
+        </title>
+        <script type="text/javascript" src="jf1.js"></script>
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+        <script type="text/javascript" src="jquery.js"></script>
+        <script type="text/javascript">
+            var qno=0;
+            var jobj;
+            var cur=1;
+            $(function(){
+                getStart();
+                $.ajax({
+                url:"getNoq.php",
+                success:function(resp){
+                      qno=parseInt(resp);
+                        
+                },
+                error:function(){
+                       
+                }
+                });
+
+
+                $.ajax({
+                    url:"getJson.php",
+                    success:function(resp){
+                       
+                        jobj=JSON.parse(resp);
+                        getQues(cur);
+                    },
+                    error:function(){
+
+                    }
+                });
+                $("#next").click(function(){
+                    cur++;
+                    if(cur==(qno+1)){
+                        cur=qno;
+                    }
+                    getQues(cur);
+                });
+                $("#pre").click(function(){
+                    cur--;
+                    if(cur==0){
+                        cur=1;
+                    }
+                    getQues(cur);
+                });
+                $("#clr").click(function(){
+                    clearFun();
+                });
+                $("#finish").click(function(){
+                    window.location.href="Result.html";
+                })
+            });
+            function getQues(curr){
+                cur=curr;
+                var now=jobj["q"+curr][0];
+                $.ajax({
+                    url:"getQues.php?qid="+now,
+                    success:function(resp){
+                        var jo;
+                        $("#qno").html("Question:"+curr);
+                        if (now[0]=="M") {
+                            $("#qtype").html("More Than One Correct");
+                            var out="<table><tr><td><input type='checkbox' id='op1' onclick='updateObj()'></td>";
+                            out+="<td id='o1'></td></tr><tr><td><input type='checkbox' id='op2' onclick='updateObj()'></td>";
+                            out+="<td id='o2'></td></tr><tr><td><input type='checkbox' id='op3' onclick='updateObj()'></td><td id='o3'></td></tr><tr><td><input type='checkbox' id='op4' onclick='updateObj()'></td><td id='o4'></td></tr></table>";
+                            $("#a").html(out);
+                            jo=JSON.parse(resp);
+                            $("#q").html(jo["ques"]);
+                            $("#o1").html(jo["o1"]);
+                            $("#o2").html(jo["o2"]);
+                            $("#o3").html(jo["o3"]);
+                            $("#o4").html(jo["o4"]);
+                            showAnsObj();
+                        }
+                        else{
+                            $("#q").html(resp);
+                            $("#qtype").html("True Or False");
+                            var out="<table><tr><td><input type='radio' value='true' name='s' onclick='updateTaf(1)' id='tf1'>";
+                            out+="<td>TRUE</td></tr><tr><td><input type='radio' value='true' name='s' onclick='updateTaf(0)' id='tf2'>";
+                            out+="<td>FALSE</td></tr></table>";
+                            $("#a").html(out);
+                            showAnsTaf();
+                        }
+                        
+                    },
+                    error:function(){
+                       
+                    }
+                    
+                });
+                
+                
+            }
+            function clearFun(){
+                var ch=jobj["q"+cur][0];
+                var sa;
+                if(ch[0]=="M"){
+                    sa="0000";
+                }
+                else if(ch[0]=="T"){
+                    sa="2";
+                }
+                $.ajax({
+                            url:"updateAns.php?ans="+sa+"&cur="+cur,
+                            success:function(resp){
+                                    jobj=JSON.parse(resp);
+                                    if(sa=="0000"){
+                                        showAnsObj();
+                                    }
+                                    else 
+                                    {
+                                        showAnsTaf();
+                                    }
+                                                        
+                            },
+                            error:function(){
+                
+                            }
+                });
+                
+                
+            }
+            function updateObj(){
+                    sa="";
+                    if($("#op1").prop("checked")){
+                        
+                        sa+="1";
+                    }
+                    else{
+                        sa+="0";
+                    }
+                    if($("#op2").prop("checked")){
+                        sa+="1";
+                    }
+                    else{
+                        sa+="0";
+                    }
+                    if($("#op3").prop("checked")){
+                        sa+="1";
+                    }
+                    else{
+                        sa+="0";
+                    }
+                    if($("#op4").prop("checked")){
+                        sa+="1";
+                    }
+                    else{
+                        sa+="0";
+                    }
+                    if(sa=="0000"){}
+                    else{
+                        updateTaf(sa);
+                    }
+                }
+                function updateTaf(sa){
+                    $.ajax({
+                            url:"updateAns.php?ans="+sa+"&cur="+cur,
+                            success:function(resp){
+                                    jobj=JSON.parse(resp);
+                                    
+                            },
+                            error:function(){
+                
+                            }
+                        });
+                }
+                function showAnsObj(){
+                    sa=jobj["q"+cur];
+                    var sap=sa[1];
+                    if(sap[0]=="1"){
+                        $("#op1").attr("checked",true);
+                    }
+                    else{
+                        $("#op1").attr("checked",false);
+                    }
+                    if(sap[1]=="1"){
+                        $("#op2").attr("checked",true);
+                    }
+                    else{
+                        $("#op2").attr("checked",false);
+                    }   
+                    if(sap[2]=="1"){
+                        $("#op3").attr("checked",true);
+                    }   
+                    else{
+                        $("#op3").attr("checked",false);
+                    }
+                    if(sap[3]=="1"){
+                        $("#op4").attr("checked",true);
+                    }   
+                    else{
+                        $("#op4").attr("checked",false);
+                    }
+                }
+                
+                function showAnsTaf(){
+                    var sa;
+                    sa=jobj["q"+cur][1];
+                    if(sa=="1"){
+                        $("#tf1").attr("checked", true);
+                    }
+                    else if(sa=="0"){
+                        $("#tf2").attr("checked", true);
+                    }
+                    else{
+                        $("#tf2").attr("checked", false);
+                        $("#tf1").attr("checked", false);
+                    }
+                }
+            
+        </script>
+        <style>
+            #header{
+                background:rgb(245,245,245);
+                width:70%;
+                position:fixed;
+                left:10px;
+                height:10%;
+            }
+            #t{
+                width:100%;
+                height:10%;
+                background:rgb(100,255,255);
+                font-size:35pt;
+                color:black;
+            }
+            #main{
+                width:65%;
+                float:left;
+            }
+            #p{
+                background:rgb(236,236,236);
+                color:white;
+                width:30%;
+                position:fixed;
+                right:0px;
+                height:100%;
+            }
+            #pd{
+                width:70%;
+                height:100%;
+            }
+            #main{
+                height:82%;
+                width:70%;
+                border:1px solid black;
+                margin-top:5%;
+            }
+            #pinfo{
+                width:100%;
+                height:20%;
+            }
+            #pb{
+                width:100%;
+                height:60%;
+                overflow:scroll;
+            }
+            #finish{
+                background:lime;
+                width:100%;
+                height:10%;
+                font-size:25pt;
+                margin-top:0px;
+            }
+            #footer{
+                background:rgb(245,245,245);                
+                width:100%;
+                height:10%;
+                position:fixed;
+                margin-top:44%;
+            }
+            #qtype{
+                width: 50%;
+                position: fixed;
+                right:0px; 
+                top:40px;
+                font-size: 15pt;
+            }
+            #qno{
+                width: 50%;
+                position: fixed;
+                left:15px;
+                top: 25px;
+                font-size: 25pt;
+            }
+            .bs{
+                width: 15%;
+                height: 40px;
+                margin-left: 10px;
+            }
+            .qb{
+                height:33px;
+                width:55px;
+                font-size:20pt;
+                margin-left:15px;
+                margin-top:15px;
+                box-shadow: 4px 4px 5px #888888;
+            }
+            #q{
+                font-size:30pt;
+                border-bottom:2px solid black;
+            }
+        </style>
+    </head>
+    <body oncontextmenu="return false">
+    <div id="md">
+        <div id="header">
+            <div id="qno"></div>
+            <div id="qtype"></div>
+        </div>
+        
+        <div id="main">
+        <div id="q"></div>
+        <div id="a"></div>
+        </div>
+        <div id="footer">
+            <input id="pre" type="button" value="Previous" class="bs">
+            <input id="rl" type="button" value="Review Later" class="bs">
+            <input id="clr" type="button" value="Clear Selection" class="bs">
+            <input id="next" type="button" value="Next" class="bs">
+        </div>
+    </div>
+        <div id="p">
+            <div style="color:black;font-size:35pt;float:left">Time Left:</div><div id="t"></div>
+            <div id="pb"></div>
+            <div id="pinfo">Scalling</div>
+            <input id="finish" type="button" value="Finish">
+        </div>
+</html>

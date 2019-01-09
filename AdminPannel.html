@@ -1,0 +1,349 @@
+<html>
+<head>
+	<title>Admin Page</title>
+	<script src="jquery.js"></script>
+	<script src="jquery-ui.js"></script>
+        <script src="jquery-ui.min.js"></script>
+        <link href="jquery-ui.css" rel="stylesheet">
+        <link href="jquery-ui.min.css" rel="stylesheet">
+        <script>
+                        var arr=[0,0,0,0]; 
+                        $.ajax({
+                             url:"checkSession.php",
+                             success:function(resp){
+                                    if(resp=="true"){
+                                        
+                                    }
+                                    else{
+                                           alert("Genune nhi h");
+                                          window.location.href="Admin.html";
+                                    }
+                             },
+                             error:function(){
+                                     alert("Error");
+                              }
+                        });
+		$(function(){
+              
+                       	var a="obj";
+                        $(".qtype").click(function(){
+				$(".check").attr("checked", false);
+				a=$(this).val();
+				if(a=="obj"){
+					var ans=""; 
+					$(".check,.textbox").removeAttr("disabled");
+					$(".textbox").val("");
+					$("#As").val("");
+									
+				}
+				else{
+					$("#As").val("");
+                                        $("#Qs").val("");
+                                        $("#o3,#o4").val("");
+					$("#o1").val("TRUE");
+					$("#o2").val("FALSE");
+					$("#oc3,#oc4,.textbox").attr("disabled","disabled");
+					$("#oc1,#oc2").removeAttr("disabled");
+					
+				}
+			});
+			$("#btn1").click(function(){
+			    $.ajax({
+			        url:"logout.php",
+			        success:function(resp){
+			            window.location.href="Admin.html";
+			        },
+			        error:function(){
+			            
+			        }
+			    });
+			});
+			$("#oc1").click(function(){
+				if(a=="taf")
+				{	$("#oc2").attr("checked",false);
+					$("#As").val("TRUE");
+				}
+			});
+			$("#oc2").click(function(){
+				if(a=="taf")
+				{	$("#oc1").attr("checked",false);
+					$("#As").val("FALSE");
+				}
+			});
+			$(".check").click(function(){
+				if(a=="obj"){
+					
+					var ans="";
+					if($("#oc1").prop("checked")){
+						arr[0]=1;
+						updateOption();
+					}
+					else{
+						arr[0]=0;
+						updateOption();
+					}
+					if($("#oc2").prop("checked")){
+						arr[1]=1;
+						updateOption()
+					}else{
+						arr[1]=0;
+						updateOption();
+					}
+					if($("#oc3").prop("checked")){
+						arr[2]=1;
+						updateOption()
+					}else{
+						arr[2]=0;
+						updateOption();
+					}
+					if($("#oc4").prop("checked")){
+						arr[3]=1;
+						updateOption()
+					}else{
+						arr[3]=0;
+						updateOption();
+					}
+					var i;
+					function updateOption(){
+						ans="";
+						for(i=0;i<4;i++){
+							if(arr[i]==1){
+								ans+="Option"+(i+1)+" ";
+							}
+						}
+						$("#As").val(ans);
+					}
+				}
+			});
+                        $("#b1").click(function(){
+				$("#div1").html("");
+                                $("#div2").html("");
+                                $("#div3").html("");
+                                var ques=$("#Qs").val();
+                                var ans=$("#As").val();
+			        var c=0;
+                                if(ques=="")
+                                {     $("#div1").html("Please enter Question.");
+                                      c=1;
+                                }
+                                if(ans=="")
+                                {     $("#div2").html("Please provide at least one answer by checking check-boxes.");
+                                      c=1;
+                                }
+                                if(a=="obj")
+                                 {       if($("#o1").val()==""||$("#o2").val()==""||$("#o3").val()==""||$("#o4").val()=="")
+                                         {     $("#div3").html("Please fill all the option boxes.");
+                                                c=1;
+                                         }
+                                }
+                                     
+                                if(c==0)
+                                {     if(a=="obj")
+                                      {      submitObj();
+                                      } 
+                                      if(a=="taf")
+                                      {      submitTaf();
+                                      }
+                                }
+                        }); 
+		});
+       
+        function submitObj()
+        {    var sa="";
+             var i=0;
+             for(i=0;i<4;i++){
+                   sa=sa+arr[i];
+             }
+             $.ajax({
+                   url:"SubmitObj.php?q="+$("#Qs").val()+"&op1="+$("#o1").val()+"&op2="+$("#o2").val()+"&op3="+$("#o3").val()+"&op4="+$("#o4").val()+"&a="+sa,
+                   success:function(resp)
+                   {
+                       if(resp=="true")
+                         {        $("#div4").html("<h1 style='color:green'>Successfully Added.</h1>").dialog();
+                                  $("#div2").html("");
+                                  $("#div3").html("");
+                                  $("#Qs").val("");
+                                  $("#As").val("");
+                                  $(".textbox").val("");
+                                  $(".check").attr("checked",false);
+                                  arr=[0,0,0,0];
+                        }
+                         else
+                         {      $("#div4").html("<h1 style='color:red'>Error occured.</h1>").dialog();
+                         }           
+                  },
+                  error:function(){
+                          alert("Error in submitting.");
+                  }
+             });           
+        }
+        function submitTaf()
+        {    
+            var v=0;
+            if($("#As").val()=="TRUE"){
+                v=1;
+            }
+            $.ajax({
+                   url:"SubmitTaf.php?q="+$("#Qs").val()+"&a="+v,
+                   success:function(resp)
+                   {      if(resp=="true")
+                          {    $("#div4").html("<h1 style='color:green'>Successfully Added.</h1>").dialog();
+                               $("#div2").html("");
+                               $("#Qs").val("");
+                               $("#As").val("");
+                               $(".check").attr("checked",false);
+                          }
+                           else
+                          {     $("#div4").html("<h1 style='color:red'>Error occured.</h1>").dialog();
+                          }
+                   },
+                  error:function(){
+                          alert("Error in submitting.");
+                  }
+             });    
+        }
+	</script>
+	<style>
+		#Qs{
+			width:800px;
+			height:80px;
+		}
+		#lqs{
+			font-size:30pt;
+			
+		}
+		.textbox{
+			width:300px;
+		}
+		#As{
+			width:800px;
+			height:75px;
+		}
+		#las{
+			font-size:27pt;
+		}
+		#d1{
+			width:400px;
+		}
+                #div{
+                        color:red;
+                }
+                #b1:hover {
+                           box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+                }
+                #btn1{
+                    position:fixed;
+                    right:10px;
+                    background: none repeat scroll 0% 0% orange;
+                    font-size: 16px;
+                    color: #FFF;
+                    text-decoration: none;
+                    border: medium none;
+                    border-radius: 4px;
+                }
+                #b1{
+                        background-color: #4CAF50; /* Green */
+                        border: none;
+                        color: white;
+                        padding: 15px 32px;
+                        text-align: center;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 16px;
+                }
+                input[type=text]:focus {
+                        border: 2px solid #555;
+                }
+                textarea:focus {
+                        border: 2px solid #555;
+                }
+
+	</style>
+</head>
+<body>
+<table>
+	<tr>
+		<div id="getVal">
+		<td>
+				<input type="radio" id="obj" name="qType" value="obj" class="qtype" checked>Objective 
+		</td>
+		<td>
+				<input type="radio" id="tf" name="qType" value="taf" class="qtype">True/False 
+		</td>
+		</div>
+	</tr>
+</table>
+<button id="btn1">LOGOUT</button>
+<br>
+<div id="ques">
+<table>
+	<tr>
+	<td><label for="Qs" id="lqs">Question: </label></td>
+	<td><textarea id="Qs" name="Qs"></textarea></td>
+	</tr>
+</table>
+<br><br>
+</div>
+<div id="d1"> 
+<table id="changer">
+	<tr>
+		<td>
+			<input type="checkbox" id="oc1" name="oc1" class="check">
+		</td>
+		<td>
+			Option 1:
+		</td>
+		<td>
+			<input type="text" id="o1" name="o1" class="textbox">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="checkbox" id="oc2" name="oc2" class="check">
+		</td>
+		<td>
+			Option 2:
+		</td>
+		<td>
+			<input type="text" id="o2" name="o2" class="textbox">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="checkbox" id="oc3" name="oc3" class="check">
+		</td>
+		<td>
+			Option 3:
+		</td>
+		<td>
+			<input type="text" id="o3" name="o3" class="textbox">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="checkbox" id="oc4" name="oc4" class="check">
+		</td>
+		<td>
+			Option 4: 
+		</td>
+		<td>
+			<input type="text" id="o4" name="o4" class="textbox">
+		</td>
+	</tr>
+</table>
+</div>
+<br><br>
+<table>
+	<tr>
+	<td><label for="As" id="las">Answer: </label></td>
+	<td><textarea type="text" id="As" name="As" disabled></textarea></td>
+	</tr>
+</table>
+</body>
+<div id=""></div>
+<button id="b1">Submit</button>
+<div id="div1" style="color:red"></div>
+<div id="div2" style="color:red"></div>
+<div id="div3" style="color:red"></div>
+<div id="div4"></div>
+</html>
